@@ -36,11 +36,9 @@
     },
     methods: {
       submitForm() {
-        // Lógica para enviar o texto ou o arquivo carregado
-        if (this.file) {
-          console.log("Arquivo enviado:", this.file.name);
-        } else if (this.inputText) {
-          console.log("Texto enviado:", this.inputText);
+        if (this.inputText.trim()) {
+          this.$emit('submitMessage', this.inputText);
+          this.inputText = ""; // Limpar o campo de input após o envio
         }
       },
       handleFileUpload(event) {

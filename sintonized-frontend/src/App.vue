@@ -2,9 +2,16 @@
   <main>
     <HeaderComponent/>
     <div class="content">
-      <!-- Outros conteúdos aqui -->
+      <div class="chat-container" ref="chatContainer">
+        <div v-for="(message, index) in messages" :key="index" class="message">
+          {{ message }}
+        </div>
+      </div>
     </div>
-    <InputComponent class="footer-input"/>
+    <InputComponent
+      class="footer-input"
+      @submitMessage="addMessage"
+    />
   </main>
 </template>
 
@@ -17,8 +24,25 @@ export default {
   components: {
     HeaderComponent,
     InputComponent,
-  }
-}
+  },
+  data() {
+    return {
+      messages: [],
+    };
+  },
+  methods: {
+    addMessage(message) {
+      if (message) {
+        this.messages.push(message);
+        this.$nextTick(() => {
+          // Rolagem automática para o final do chat
+          const chatContainer = this.$refs.chatContainer;
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
+      }
+    },
+  },
+};
 </script>
 
 <style>
@@ -41,7 +65,23 @@ main {
 
 .content {
   flex: 1;
-  /* Outros estilos para o conteúdo da página */
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.chat-container {
+  max-height: 70vh; /* Limita a altura do container de chat */
+  overflow-y: auto;
+}
+
+.message {
+  background-color: #e0e0e0;
+  padding: 10px;
+  border-radius: 15px;
+  margin: 5px 0;
+  text-align: left;
+  max-width: 60%;
+  word-wrap: break-word;
 }
 
 .footer-input {
