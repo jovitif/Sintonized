@@ -1,14 +1,22 @@
 <template>
-  <HeaderComponent/>
+  <main>
+    <HeaderComponent/>
+    <div class="content">
+      <!-- Outros conteúdos aqui -->
+    </div>
+    <InputComponent class="footer-input"/>
+  </main>
 </template>
 
 <script>
 import HeaderComponent from './components/HeaderComponent'
+import InputComponent from './components/InputComponent'
 
 export default {
   name: 'App',
   components: {
     HeaderComponent,
+    InputComponent,
   }
 }
 </script>
@@ -20,6 +28,23 @@ export default {
   font-family: "Poppins", sans-serif;
   text-align: center;
   color: #2c3e50;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  /* Outros estilos para o conteúdo da página */
+}
+
+.footer-input {
+  margin-top: auto;
 }
 </style>

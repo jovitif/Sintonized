@@ -15,11 +15,11 @@ export default{
 <style>
 .profile{
     border-radius: 50%;
-    height: 55px;
+    height: 50px;
 }
 
 h1{
-    font-size: 27px;
+    font-size: 22px;
     color: #d1410c;
     margin-left: 10px;
 }
