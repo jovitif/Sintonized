@@ -1,52 +1,76 @@
 <template>
-    <form class="submit-form" @submit.prevent="submitForm">
-      <div class="input-container">
-        <input
-          type="file"
-          name="file"
-          id="file"
-          accept=".mp3"
-          @change="handleFileUpload"
-          hidden
-        />
-        <label for="file" class="file-upload-label">
-          <span>🎵</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Digite um efeito de alguma música ou carregue um .mp3"
-          v-model="inputText"
-          @keydown.enter="submitForm"
-        />
-        <button type="submit">
-          <span>➤</span>
-        </button>
-      </div>
-    </form>
-  </template>
+  <form class="submit-form" @submit.prevent="submitForm">
+    <div class="input-container">
+      <input
+      type="file"
+      name="file"
+      id="file"
+      accept=".mp3"
+      @change="handleFileUpload"
+      hidden
+    />
+    <label for="file" class="file-upload-label">
+      <span>🎵</span>
+    </label>
+      <input
+        type="text"
+        placeholder="Digite o nome da música e do artista (ex: Artista - Música)"
+        v-model="inputText"
+        @keydown.enter="submitForm"
+      />
+      <button type="submit">
+        <span>➤</span>
+      </button>
+    </div>
+  </form>
+</template>
 
-  <script>
-  export default {
-    name: 'inputComponent',
-    data() {
-      return {
-        inputText: "",
-        file: null,
-      };
-    },
-    methods: {
-      submitForm() {
-        if (this.inputText.trim()) {
-          this.$emit('submitMessage', this.inputText);
-          this.inputText = ""; // Limpar o campo de input após o envio
+<script>
+export default {
+  name: 'InputComponent',
+  data() {
+    return {
+      inputText: "",
+    };
+  },
+  methods: {
+    async submitForm() {
+      if (this.inputText.trim()) {
+        const response = await this.fetchTrackData(this.inputText);
+        if (response) {
+          this.$emit('submitMessage', response);
         }
-      },
-      handleFileUpload(event) {
-        this.file = event.target.files[0];
-      },
+        this.inputText = ""; // Limpa o campo de input após o envio
+      }
     },
-  };
-  </script>
+    async fetchTrackData(query) {
+      const apiKey = process.env.VUE_APP_LASTFM_API_KEY;
+
+      const [artist, track] = query.split(" - "); // Espera o formato "artista - música"
+      const url = `http://ws.audioscrobbler.com/2.0/?method=track.getInfo&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&api_key=${apiKey}&format=json`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.track) {
+          return {
+            artist: data.track.artist.name,
+            trackName: data.track.name,
+            albumName: data.track.album ? data.track.album.title : 'Álbum não disponível',
+            albumArt: data.track.album && data.track.album.image[3] && data.track.album.image[3]['#text'] ? data.track.album.image[3]['#text'] : '', // Imagem maior
+          };
+        }
+      } catch (error) {
+        console.error("Erro ao buscar dados da música:", error);
+      }
+      return null;
+    },
+  },
+};
+</script>
+
+
+
 
   <style>
   .submit-form {

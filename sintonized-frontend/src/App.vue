@@ -1,18 +1,28 @@
 <template>
-  <main>
+
     <HeaderComponent/>
+    <main>
     <div class="content">
       <div class="chat-container" ref="chatContainer">
-        <div v-for="(message, index) in messages" :key="index" class="message">
-          {{ message }}
+        <!-- Exibe as informações da música retornada -->
+        <div v-if="message" class="message-card">
+          <div v-if="message.albumArt">
+            <img :src="message.albumArt" alt="Album Art" class="album-art"/>
+          </div>
+          <div>
+            <strong>Música:</strong> {{ message.trackName }}<br>
+            <strong>Banda:</strong> {{ message.artist }}<br>
+            <strong>Álbum:</strong> {{ message.albumName }}
+          </div>
         </div>
       </div>
     </div>
+  </main>
     <InputComponent
       class="footer-input"
       @submitMessage="addMessage"
     />
-  </main>
+
 </template>
 
 <script>
@@ -27,15 +37,14 @@ export default {
   },
   data() {
     return {
-      messages: [],
+      message: null,
     };
   },
   methods: {
     addMessage(message) {
       if (message) {
-        this.messages.push(message);
+        this.message = message;
         this.$nextTick(() => {
-          // Rolagem automática para o final do chat
           const chatContainer = this.$refs.chatContainer;
           chatContainer.scrollTop = chatContainer.scrollHeight;
         });
@@ -46,11 +55,10 @@ export default {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 #app {
   font-family: "Poppins", sans-serif;
-  text-align: center;
   color: #2c3e50;
   height: 100vh;
   display: flex;
@@ -61,30 +69,46 @@ main {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center; /* Centraliza o conteúdo verticalmente */
+  align-items: center; /* Centraliza o conteúdo horizontalmente */
 }
 
 .content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Centraliza o chat-container horizontalmente */
 }
 
 .chat-container {
   max-height: 70vh; /* Limita a altura do container de chat */
   overflow-y: auto;
+  display: flex;
+  justify-content: center; /* Centraliza o conteúdo do chat-container horizontalmente */
+  width: 100%;
 }
 
-.message {
-  background-color: #e0e0e0;
-  padding: 10px;
+.message-card {
+  background-color: #d1410c;
+  padding: 20px;
   border-radius: 15px;
-  margin: 5px 0;
-  text-align: left;
+  text-align: center;
+  color: aliceblue;
   max-width: 60%;
-  word-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.album-art {
+  border-radius: 10px;
+  width: 150px;
+  height: 150px;
+  margin-bottom: 10px;
 }
 
 .footer-input {
   margin-top: auto;
 }
 </style>
+
