@@ -82,7 +82,7 @@ main {
 }
 
 .chat-container {
-  max-height: 70vh; /* Limita a altura do container de chat */
+  max-height: 50vh; /* Limita a altura do container de chat */
   overflow-y: auto;
   display: flex;
   justify-content: center; /* Centraliza o conteúdo do chat-container horizontalmente */
@@ -95,8 +95,8 @@ main {
   border-radius: 15px;
   text-align: center;
   color: aliceblue;
-  max-width: 60%;
-  width: 100%;
+  max-width: 30%;
+  width: 40%;
   box-sizing: border-box;
 }
 
