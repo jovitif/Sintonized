@@ -1,114 +1,103 @@
 <template>
+  <div id="app">
+    <h1>Sistema de Efeitos de Som</h1>
+    <!-- Componente de entrada -->
+    <InputComponent @submitMessage="handleMessage" />
 
-    <HeaderComponent/>
-    <main>
-    <div class="content">
-      <div class="chat-container" ref="chatContainer">
-        <!-- Exibe as informações da música retornada -->
-        <div v-if="message" class="message-card">
-          <div v-if="message.albumArt">
-            <img :src="message.albumArt" alt="Album Art" class="album-art"/>
-          </div>
-          <div>
-            <strong>Música:</strong> {{ message.trackName }}<br>
-            <strong>Banda:</strong> {{ message.artist }}<br>
-            <strong>Álbum:</strong> {{ message.albumName }}
-          </div>
-        </div>
+    <!-- Exibe os componentes dinamicamente com base nas palavras-chave -->
+    <div class="components-container">
+      <div v-for="(component, index) in activeComponents" :key="index" class="component-wrapper">
+        <!-- Renderiza dinamicamente o componente correto -->
+        <component :is="component.name" />
+        <!-- Botão "X" para remover o componente -->
+        <button @click="removeComponent(index)" class="remove-button">X</button>
       </div>
     </div>
-  </main>
-    <InputComponent
-      class="footer-input"
-      @submitMessage="addMessage"
-    />
-
+    <TunerComponent/>
+    <AmplifierComponent/>
+    <OverdrivePedal/>
+    <AudioPlayer/>
+  </div>
 </template>
 
 <script>
-import HeaderComponent from './components/HeaderComponent'
-import InputComponent from './components/InputComponent'
+import InputComponent from './components/InputComponent.vue';
+import AmplifierComponent from './components/AmpSimulator.vue';
+import TunerComponent from './components/GuitarTuner.vue';
+import AudioPlayer from './components/AudioPlayer.vue';
 
 export default {
   name: 'App',
   components: {
-    HeaderComponent,
     InputComponent,
+    AmplifierComponent,
+    TunerComponent,
+    AudioPlayer,
   },
   data() {
     return {
-      message: null,
+      // Lista de componentes ativos
+      activeComponents: [],
     };
   },
   methods: {
-    addMessage(message) {
-      if (message) {
-        this.message = message;
-        this.$nextTick(() => {
-          const chatContainer = this.$refs.chatContainer;
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-        });
+    handleMessage(responseText) {
+      const lowerCaseText = responseText.toLowerCase();
+
+      // Adiciona componentes com base nas palavras-chave sem duplicar
+      if (lowerCaseText.includes('amplificador') && !this.isComponentActive('AmplifierComponent')) {
+        this.activeComponents.push({ name: 'AmplifierComponent' });
       }
+      if (lowerCaseText.includes('afinador') && !this.isComponentActive('TunerComponent')) {
+        this.activeComponents.push({ name: 'TunerComponent' });
+      }
+      if (lowerCaseText.includes('tremolo') && !this.isComponentActive('TremoloComponent')) {
+        this.activeComponents.push({ name: 'TremoloComponent' });
+      }
+    },
+    // Verifica se o componente já está ativo
+    isComponentActive(componentName) {
+      return this.activeComponents.some(component => component.name === componentName);
+    },
+    // Remove um componente da lista
+    removeComponent(index) {
+      this.activeComponents.splice(index, 1);
     },
   },
 };
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
-
 #app {
-  font-family: "Poppins", sans-serif;
-  color: #2c3e50;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Centraliza o conteúdo verticalmente */
-  align-items: center; /* Centraliza o conteúdo horizontalmente */
-}
-
-.content {
-  flex: 1;
-  overflow-y: auto;
-  width: 100%;
-  display: flex;
-  justify-content: center; /* Centraliza o chat-container horizontalmente */
-}
-
-.chat-container {
-  max-height: 50vh; /* Limita a altura do container de chat */
-  overflow-y: auto;
-  display: flex;
-  justify-content: center; /* Centraliza o conteúdo do chat-container horizontalmente */
-  width: 100%;
-}
-
-.message-card {
-  background-color: #d1410c;
-  padding: 20px;
-  border-radius: 15px;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
   text-align: center;
-  color: aliceblue;
-  max-width: 30%;
-  width: 40%;
-  box-sizing: border-box;
+  margin-top: 50px;
 }
 
-.album-art {
-  border-radius: 10px;
-  width: 150px;
-  height: 150px;
-  margin-bottom: 10px;
+.components-container {
+  margin-top: 20px;
 }
 
-.footer-input {
-  margin-top: auto;
+.component-wrapper {
+  position: relative;
+  display: inline-block;
+  margin: 10px;
+}
+
+.remove-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+.remove-button:hover {
+  background: darkred;
 }
 </style>
-
