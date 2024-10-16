@@ -1,103 +1,60 @@
 <template>
   <div id="app">
-    <h1>Sistema de Efeitos de Som</h1>
-    <!-- Componente de entrada -->
-    <InputComponent @submitMessage="handleMessage" />
-
-    <!-- Exibe os componentes dinamicamente com base nas palavras-chave -->
-    <div class="components-container">
-      <div v-for="(component, index) in activeComponents" :key="index" class="component-wrapper">
-        <!-- Renderiza dinamicamente o componente correto -->
-        <component :is="component.name" />
-        <!-- Botão "X" para remover o componente -->
-        <button @click="removeComponent(index)" class="remove-button">X</button>
-      </div>
-    </div>
-    <TunerComponent/>
-    <AmplifierComponent/>
-    <OverdrivePedal/>
-    <AudioPlayer/>
+      <VirtualPiano/>
   </div>
 </template>
 
 <script>
-import InputComponent from './components/InputComponent.vue';
-import AmplifierComponent from './components/AmpSimulator.vue';
-import TunerComponent from './components/GuitarTuner.vue';
-import AudioPlayer from './components/AudioPlayer.vue';
+import VirtualPiano from './components/VirtualPiano.vue';
 
 export default {
   name: 'App',
   components: {
-    InputComponent,
-    AmplifierComponent,
-    TunerComponent,
-    AudioPlayer,
+    VirtualPiano,
   },
   data() {
     return {
-      // Lista de componentes ativos
-      activeComponents: [],
+      audioContext: null,
+      gainNode: null,
+      bassFilter: null,
+      midFilter: null,
+      trebleFilter: null,
+      showPiano: false, // Variável que controla a exibição do piano
     };
   },
-  methods: {
-    handleMessage(responseText) {
-      const lowerCaseText = responseText.toLowerCase();
+  mounted() {
+    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    this.gainNode = this.audioContext.createGain();
+    this.bassFilter = this.audioContext.createBiquadFilter();
+    this.midFilter = this.audioContext.createBiquadFilter();
+    this.trebleFilter = this.audioContext.createBiquadFilter();
 
-      // Adiciona componentes com base nas palavras-chave sem duplicar
-      if (lowerCaseText.includes('amplificador') && !this.isComponentActive('AmplifierComponent')) {
-        this.activeComponents.push({ name: 'AmplifierComponent' });
-      }
-      if (lowerCaseText.includes('afinador') && !this.isComponentActive('TunerComponent')) {
-        this.activeComponents.push({ name: 'TunerComponent' });
-      }
-      if (lowerCaseText.includes('tremolo') && !this.isComponentActive('TremoloComponent')) {
-        this.activeComponents.push({ name: 'TremoloComponent' });
-      }
-    },
-    // Verifica se o componente já está ativo
-    isComponentActive(componentName) {
-      return this.activeComponents.some(component => component.name === componentName);
-    },
-    // Remove um componente da lista
-    removeComponent(index) {
-      this.activeComponents.splice(index, 1);
-    },
+    // Configura os filtros do amplificador
+    this.bassFilter.type = 'lowshelf';
+    this.bassFilter.frequency.setValueAtTime(200, this.audioContext.currentTime);
+    this.midFilter.type = 'peaking';
+    this.midFilter.frequency.setValueAtTime(1000, this.audioContext.currentTime);
+    this.trebleFilter.type = 'highshelf';
+    this.trebleFilter.frequency.setValueAtTime(3000, this.audioContext.currentTime);
+
+    // Conecta os nós de áudio: Piano -> Amplificador -> Destination
+    this.gainNode.connect(this.bassFilter);
+    this.bassFilter.connect(this.midFilter);
+    this.midFilter.connect(this.trebleFilter);
+    this.trebleFilter.connect(this.audioContext.destination);
   },
+  methods: {
+    togglePiano() {
+      this.showPiano = !this.showPiano; // Alterna entre mostrar e ocultar o piano
+    }
+  }
 };
 </script>
-
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  text-align: center;
-  margin-top: 50px;
-}
-
-.components-container {
-  margin-top: 20px;
-}
-
-.component-wrapper {
-  position: relative;
-  display: inline-block;
-  margin: 10px;
-}
-
-.remove-button {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: red;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-}
-
-.remove-button:hover {
-  background: darkred;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
 }
 </style>

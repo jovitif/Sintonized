@@ -6,6 +6,18 @@ const cors = require('cors');
 
 app.use(express.json());
 
+const validCommands = ['ligar', 'desligar'];
+
+const handleInstrumentControl = (text) => {
+    text = text.toLowerCase();
+    if (text.includes('ligar')) {
+        return 'Instrumento ligado';
+    } else if (text.includes('desligar')) {
+        return 'Instrumento desligado';
+    }
+    return null;
+};
+
 app.use(cors({
     origin: 'http://localhost:8080',
     methods: ['GET', 'POST'],
@@ -14,14 +26,7 @@ app.use(cors({
 
 // Lista de efeitos válidos
 const validEffects = [
-    "Overdrive", "Fuzz", "Distortion", "Bit Crusher", "Afinador","amplificador",
-    "Chorus", "Flanger", "Phaser", "Tremolo",
-    "Delay", "Echo", "Reverb", "Spring Reverb",
-    "Equalizer", "Wah-Wah", "Compressor", "Boost",
-    "Noise Gate", "Octaver", "Auto-Wah", "Vibrato",
-    "Pitch Shifter", "Harmonizer", "Looper", "Tape Saturation",
-    "Ring Modulator", "Panner", "Tremolo Arm", "Envelope Filter",
-    "Glitch", "Reverse", "Resonator", "Rotary Speaker"
+    "triangle", "sine", "square", "sawtooth", "custom",
 ];
 
 
@@ -58,14 +63,19 @@ const model = genAI.getGenerativeModel({
     },
 });
 
-// Controller function to handle chat conversation
 app.post('/echo', async (req, res) => {
     try {
         const text = req.body.text;
 
+        // Verificar comandos de controle
+        const controlResponse = handleInstrumentControl(text);
+        if (controlResponse) {
+            return res.json({ response: controlResponse });
+        }
+
         const effectsList = validEffects.join(', ');
 
-        const prompt = `Tenho esses: ${effectsList}. Com base na descrição fornecida, "${text}", retorne somente os efeitos de som que são adequados separados por virgula unicamente`;
+        const prompt = `Tenho esses: ${effectsList} da web audio API. Com base na descrição fornecida, "${text}", retorne somente o efeito que represente esse texto`;
 
         console.log(`Prompt enviado: ${prompt}`);
 
@@ -80,8 +90,6 @@ app.post('/echo', async (req, res) => {
         const responseText = response.text();
 
         console.log(`Resposta gerada: ${responseText}`);
-
-     //   const validResponse = filterValidEffects(responseText);
 
         res.json({ response: responseText });
     } catch (err) {
